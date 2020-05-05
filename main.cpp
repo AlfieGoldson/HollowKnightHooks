@@ -7,6 +7,7 @@
 const char *WINDOW_NAME = "Hollow Knight";
 const char *MODULE_NAME = "UnityPlayer.dll";
 
+std::vector<DWORD> playerBaseOffsets = {0x000D94E4, 0x40, 0x140};
 std::map<const char *, DWORD> playerOffsets = {
 	{"geos", 0x118},
 	{"maxCharms", 0x41C},
@@ -65,9 +66,6 @@ DWORD FindOffsetAddress(HANDLE pHandle, DWORD baseAddress, std::vector<DWORD> of
 
 int main()
 {
-	int newValue = 789456;
-	std::vector<DWORD> playerBaseOffsets = {0x000D94E4, 0x40, 0x140};
-
 	HWND hwnd = FindWindowA(NULL, WINDOW_NAME);
 	if (!hwnd)
 		return 1;
