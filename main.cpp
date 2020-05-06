@@ -5,19 +5,23 @@
 #include <map>
 
 const char *WINDOW_NAME = "Hollow Knight";
-const char *MODULE_NAME = "UnityPlayer.dll";
+const char *MODULE_NAME = "mono.dll";
 
-std::vector<DWORD> playerBaseOffsets = {0x000D94E4, 0x40, 0x140};
-std::map<const char *, DWORD> playerOffsets = {
-	{"geos", 0x118},
-	{"maxCharms", 0x41C},
-	{"soul", 0x120},
-	{"charms", 0x420},
-	{"maxLives", 0x0e8},
-	{"maxLives2", 0x0ec},
-	{"lives", 0x0e4},
-	{"isOnBench", 0x144},
+std::vector<DWORD> playerBaseOffsets = {0x1F50AC, 0x3B4, 0xC, 0x60};
+
+struct hkPlayer
+{
+	DWORD geos;
+	DWORD soul;
+	DWORD maxCharms;
+	DWORD charms;
+	DWORD maxLives;
+	DWORD maxLives2;
+	DWORD lives;
+	DWORD isOnBench;
 };
+
+struct hkPlayer baseOffsets = {0x118, 0x120, 0x41C, 0x420, 0x0E8, 0x0EC, 0x0E4, 0x144};
 
 void errorExit(const char *err)
 {
@@ -84,20 +88,23 @@ int main()
 	DWORD playerBase = FindOffsetAddress(handle, unityPlayerBase, playerBaseOffsets);
 	std::cout << "Player Base Address: 0x" << std::hex << playerBase << std::endl;
 
-	int geos;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["geos"]), &geos, sizeof(geos), NULL);
-	int soul;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["soul"]), &soul, sizeof(geos), NULL);
+	struct hkPlayer currentPlayer = {
+		playerBase + baseOffsets.geos,
+		playerBase + baseOffsets.soul,
+		playerBase + baseOffsets.maxCharms,
+		playerBase + baseOffsets.charms,
+		playerBase + baseOffsets.maxLives,
+		playerBase + baseOffsets.maxLives2,
+		playerBase + baseOffsets.lives,
+		playerBase + baseOffsets.isOnBench};
 
-	int charms;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["charms"]), &charms, sizeof(charms), NULL);
-	int maxCharms;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["maxCharms"]), &maxCharms, sizeof(maxCharms), NULL);
-
-	int lives;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["lives"]), &lives, sizeof(lives), NULL);
-	int maxLives;
-	ReadProcessMemory(handle, (LPCVOID)(playerBase + playerOffsets["maxLives"]), &maxLives, sizeof(maxLives), NULL);
+	int geos, soul, charms, maxCharms, lives, maxLives;
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.geos), &geos, sizeof(int), NULL);
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.soul), &soul, sizeof(int), NULL);
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.charms), &charms, sizeof(int), NULL);
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.maxCharms), &maxCharms, sizeof(int), NULL);
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.lives), &lives, sizeof(int), NULL);
+	ReadProcessMemory(handle, (LPCVOID)(currentPlayer.maxLives), &maxLives, sizeof(int), NULL);
 
 	std::cout << std::dec << "Geos: " << geos << std::endl;
 	std::cout << std::dec << "Soul: " << soul << std::endl;
